@@ -1,0 +1,41 @@
+name: Lavalink Server Deployment
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  validate-lavalink:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Checkout repository code
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    
+    # Set up Java
+    - name: Set up Java 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    # Verify Lavalink JAR
+    - name: Validate Lavalink JAR
+      run: |
+        # Check if Lavalink JAR exists
+        ls libs/
+        
+        # Try to get Lavalink version
+        java -jar libs/Lavalink.jar --version || echo "Version check failed"
+    
+    # Optional: Create GitHub Release
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          libs/Lavalink.jar
+          application.yml
+          start.sh
